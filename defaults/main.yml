@@ -1,0 +1,192 @@
+---
+# SSH Hardening Role - Default Variables
+# These variables can be overridden in host_vars, group_vars, or playbooks
+
+# Package and Service Configuration
+ssh_package_name: "{{ 'openssh-server' if ansible_os_family == 'Debian' else 'openssh' }}"
+ssh_service_name: "{{ 'ssh' if ansible_os_family == 'Debian' else 'sshd' }}"
+ssh_config_file: /etc/ssh/sshd_config
+
+# Network Configuration
+ssh_port: 22
+ssh_listen_addresses: []  # Empty list means listen on all interfaces
+ssh_address_family: any   # any, inet, inet6
+
+# Protocol and Security
+ssh_protocol: 2
+
+# Host Key Types (only secure algorithms)
+ssh_host_key_types:
+  - rsa
+  - ecdsa
+  - ed25519
+
+# Cryptographic Algorithms (only secure ones)
+ssh_kex_algorithms:
+  - curve25519-sha256@libssh.org
+  - diffie-hellman-group16-sha512
+  - diffie-hellman-group18-sha512
+  - diffie-hellman-group14-sha256
+
+ssh_ciphers:
+  - chacha20-poly1305@openssh.com
+  - aes256-gcm@openssh.com
+  - aes128-gcm@openssh.com
+  - aes256-ctr
+  - aes192-ctr
+  - aes128-ctr
+
+ssh_macs:
+  - hmac-sha2-256-etm@openssh.com
+  - hmac-sha2-512-etm@openssh.com
+  - hmac-sha2-256
+  - hmac-sha2-512
+
+# Authentication Settings
+ssh_login_grace_time: 30
+ssh_permit_root_login: "no"
+ssh_strict_modes: "yes"
+ssh_max_auth_tries: 3
+ssh_max_sessions: 2
+ssh_max_startups: "10:30:60"
+
+# Public Key Authentication
+ssh_pubkey_authentication: "yes"
+ssh_authorized_keys_file: ".ssh/authorized_keys"
+
+# Password Authentication (disabled for security)
+ssh_password_authentication: "no"
+ssh_permit_empty_passwords: "no"
+ssh_challenge_response_auth: "no"
+
+# Kerberos Authentication (disabled by default)
+ssh_kerberos_authentication: "no"
+ssh_kerberos_or_local_passwd: "no"
+ssh_kerberos_ticket_cleanup: "yes"
+
+# GSSAPI Authentication (disabled by default)
+ssh_gssapi_authentication: "no"
+ssh_gssapi_cleanup_credentials: "yes"
+
+# User and Group Restrictions (empty by default)
+ssh_allow_users: []
+ssh_deny_users: []
+ssh_allow_groups: []
+ssh_deny_groups: []
+
+# Forwarding and Tunneling (restricted for security)
+ssh_allow_agent_forwarding: "no"
+ssh_allow_tcp_forwarding: "no"
+ssh_gateway_ports: "no"
+ssh_x11_forwarding: "no"
+ssh_x11_display_offset: 10
+ssh_x11_use_localhost: "yes"
+ssh_permit_tty: "yes"
+ssh_permit_tunnel: "no"
+
+# Environment
+ssh_permit_user_environment: "no"
+ssh_accept_env:
+  - LANG
+  - LC_*
+
+# Compression (disabled for security)
+ssh_compression: "no"
+
+# Client Alive Settings
+ssh_client_alive_interval: 300
+ssh_client_alive_count_max: 2
+
+# Logging
+ssh_syslog_facility: AUTH
+ssh_log_level: INFO
+
+# Banner Configuration
+ssh_banner_enabled: true
+ssh_banner_file: /etc/ssh/banner
+ssh_banner_content: |
+  ***************************************************************************
+                              AUTHORIZED ACCESS ONLY
+  ***************************************************************************
+  
+  This system is for authorized users only. All activities on this system
+  are monitored and recorded. By accessing this system, you acknowledge that:
+  
+  1. You are an authorized user
+  2. Your activities may be monitored and recorded
+  3. Unauthorized access is prohibited and may be subject to prosecution
+  4. You have no expectation of privacy on this system
+  
+  If you are not an authorized user, disconnect immediately.
+  
+  ***************************************************************************
+
+# Subsystems
+ssh_subsystems:
+  - name: sftp
+    command: /usr/lib/openssh/sftp-server
+
+# Additional Security Settings
+ssh_use_dns: "no"
+ssh_permit_user_rc: "no"
+ssh_print_motd: "no"
+ssh_print_last_log: "yes"
+ssh_tcp_keep_alive: "yes"
+ssh_use_privilege_separation: "yes"
+
+# Authentication Methods
+ssh_authentication_methods:
+  - publickey
+
+# Trusted CA Keys (optional)
+ssh_trusted_user_ca_keys: ""
+
+# Match Blocks (for conditional configurations)
+ssh_match_blocks: []
+# Example:
+# ssh_match_blocks:
+#   - condition: "User admin"
+#     settings:
+#       PasswordAuthentication: "yes"
+#       MaxAuthTries: "5"
+
+# SSH Client Configuration
+configure_ssh_client: true
+ssh_client_protocol: 2
+ssh_client_kex_algorithms: "{{ ssh_kex_algorithms }}"
+ssh_client_ciphers: "{{ ssh_ciphers }}"
+ssh_client_macs: "{{ ssh_macs }}"
+ssh_client_host_key_algorithms:
+  - ssh-ed25519-cert-v01@openssh.com
+  - ssh-rsa-cert-v01@openssh.com
+  - ssh-ed25519
+  - ecdsa-sha2-nistp521
+  - ecdsa-sha2-nistp384
+  - ecdsa-sha2-nistp256
+  - rsa-sha2-512
+  - rsa-sha2-256
+
+ssh_client_pubkey_accepted_key_types:
+  - ssh-ed25519-cert-v01@openssh.com
+  - ssh-rsa-cert-v01@openssh.com
+  - ssh-ed25519
+  - ecdsa-sha2-nistp521
+  - ecdsa-sha2-nistp384
+  - ecdsa-sha2-nistp256
+  - rsa-sha2-512
+  - rsa-sha2-256
+
+ssh_client_password_authentication: "no"
+ssh_client_challenge_response_auth: "no"
+ssh_client_pubkey_authentication: "yes"
+ssh_client_strict_host_key_checking: "ask"
+ssh_client_verify_host_key_dns: "yes"
+ssh_client_forward_agent: "no"
+ssh_client_forward_x11: "no"
+ssh_client_forward_x11_trusted: "no"
+ssh_client_server_alive_interval: 300
+ssh_client_server_alive_count_max: 2
+ssh_client_tcp_keep_alive: "yes"
+ssh_client_compression: "no"
+ssh_client_log_level: INFO
+ssh_client_hash_known_hosts: "yes"

@@ -1,0 +1,211 @@
+---
+# Example Playbook for SSH Hardening Role
+# This playbook demonstrates various usage scenarios
+
+# Basic SSH Hardening
+- name: Basic SSH Hardening
+  hosts: basic_servers
+  become: yes
+  roles:
+    - role: ansible-role-ssh-hardening
+      tags: ['ssh', 'security']
+
+---
+# Advanced SSH Hardening with Custom Configuration
+- name: Advanced SSH Hardening
+  hosts: production_servers
+  become: yes
+  vars:
+    # Custom port for security through obscurity
+    ssh_port: 2222
+    
+    # Strict authentication settings
+    ssh_max_auth_tries: 2
+    ssh_max_sessions: 1
+    ssh_login_grace_time: 20
+    
+    # User access control
+    ssh_allow_groups:
+      - ssh-users
+      - administrators
+    ssh_deny_users:
+      - guest
+      - test
+    
+    # Enhanced security settings
+    ssh_client_alive_interval: 180
+    ssh_client_alive_count_max: 1
+    
+    # Custom banner
+    ssh_banner_content: |
+      ================================================================================
+                                  PRODUCTION SYSTEM
+      ================================================================================
+      
+      This is a production system. Unauthorized access is strictly prohibited.
+      All activities are monitored, logged, and may be subject to legal action.
+      
+      By accessing this system, you agree to comply with all security policies.
+      ================================================================================
+    
+    # Conditional configurations using match blocks
+    ssh_match_blocks:
+      - condition: "User backup"
+        settings:
+          ForceCommand: "/usr/local/bin/backup-only.sh"
+          AllowTcpForwarding: "no"
+      - condition: "Group administrators"
+        settings:
+          MaxAuthTries: "5"
+          X11Forwarding: "yes"
+  
+  roles:
+    - role: ansible-role-ssh-hardening
+      tags: ['ssh', 'security', 'production']
+
+---
+# High Security Environment
+- name: High Security SSH Configuration
+  hosts: secure_servers
+  become: yes
+  vars:
+    # Network configuration
+    ssh_port: 2222
+    ssh_listen_addresses:
+      - "10.0.1.100"
+      - "192.168.1.100"
+    
+    # Strict authentication
+    ssh_permit_root_login: "no"
+    ssh_password_authentication: "no"
+    ssh_challenge_response_auth: "no"
+    ssh_max_auth_tries: 1
+    ssh_max_sessions: 1
+    ssh_login_grace_time: 15
+    
+    # Only allow specific users
+    ssh_allow_users:
+      - admin
+      - security-officer
+    
+    # Disable all forwarding
+    ssh_allow_agent_forwarding: "no"
+    ssh_allow_tcp_forwarding: "no"
+    ssh_x11_forwarding: "no"
+    ssh_permit_tunnel: "no"
+    
+    # Enhanced monitoring
+    ssh_log_level: VERBOSE
+    
+    # Require multiple authentication methods
+    ssh_authentication_methods:
+      - "publickey,keyboard-interactive"
+    
+    # Custom cryptographic settings (even more restrictive)
+    ssh_ciphers:
+      - chacha20-poly1305@openssh.com
+      - aes256-gcm@openssh.com
+    
+    ssh_macs:
+      - hmac-sha2-256-etm@openssh.com
+      - hmac-sha2-512-etm@openssh.com
+    
+    ssh_kex_algorithms:
+      - curve25519-sha256@libssh.org
+      - diffie-hellman-group16-sha512
+  
+  roles:
+    - role: ansible-role-ssh-hardening
+      tags: ['ssh', 'security', 'high-security']
+
+---
+# Development Environment (Less Restrictive)
+- name: Development SSH Configuration
+  hosts: dev_servers
+  become: yes
+  vars:
+    # Standard port for development
+    ssh_port: 22
+    
+    # More lenient settings for development
+    ssh_max_auth_tries: 5
+    ssh_max_sessions: 5
+    ssh_login_grace_time: 60
+    
+    # Allow X11 forwarding for GUI applications
+    ssh_x11_forwarding: "yes"
+    
+    # Allow TCP forwarding for development tools
+    ssh_allow_tcp_forwarding: "yes"
+    
+    # Development-friendly banner
+    ssh_banner_content: |
+      ================================================================================
+                                DEVELOPMENT ENVIRONMENT
+      ================================================================================
+      
+      This is a development system. Please follow development guidelines.
+      All activities are logged for troubleshooting purposes.
+      ================================================================================
+    
+    # Allow developers group
+    ssh_allow_groups:
+      - developers
+      - testers
+  
+  roles:
+    - role: ansible-role-ssh-hardening
+      tags: ['ssh', 'security', 'development']
+
+---
+# Compliance-Focused Configuration (CIS/NIST)
+- name: Compliance SSH Hardening
+  hosts: compliance_servers
+  become: yes
+  vars:
+    # CIS Benchmark compliance settings
+    ssh_protocol: 2
+    ssh_permit_root_login: "no"
+    ssh_password_authentication: "no"
+    ssh_permit_empty_passwords: "no"
+    ssh_challenge_response_auth: "no"
+    ssh_kerberos_authentication: "no"
+    ssh_gssapi_authentication: "no"
+    
+    # Access control as per compliance requirements
+    ssh_max_auth_tries: 3
+    ssh_max_sessions: 2
+    ssh_login_grace_time: 30
+    
+    # Logging for compliance
+    ssh_log_level: INFO
+    ssh_syslog_facility: AUTHPRIV
+    
+    # Disable unnecessary features
+    ssh_allow_agent_forwarding: "no"
+    ssh_allow_tcp_forwarding: "no"
+    ssh_x11_forwarding: "no"
+    ssh_permit_tunnel: "no"
+    ssh_permit_user_environment: "no"
+    
+    # Strong cryptography only
+    ssh_use_privilege_separation: "yes"
+    ssh_strict_modes: "yes"
+    ssh_use_dns: "no"
+    
+    # Compliance banner
+    ssh_banner_enabled: true
+    ssh_banner_content: |
+      ================================================================================
+                              COMPLIANCE MONITORED SYSTEM
+      ================================================================================
+      
+      This system is subject to compliance monitoring and auditing.
+      All access must be authorized and activities are logged.
+      
+      Unauthorized access is prohibited and may result in prosecution.
+      ================================================================================
+  
+  roles:
+    - role: ansible-role-ssh-hardening
+      tags: ['ssh', 'security', 'compliance', 'cis', 'nist']

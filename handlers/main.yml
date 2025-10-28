@@ -1,0 +1,45 @@
+---
+# SSH Hardening Role - Handlers
+# These handlers manage SSH service state changes
+
+- name: restart ssh
+  service:
+    name: "{{ ssh_service_name }}"
+    state: restarted
+  listen: "restart ssh"
+  tags:
+    - ssh
+    - service
+
+- name: reload ssh
+  service:
+    name: "{{ ssh_service_name }}"
+    state: reloaded
+  listen: "reload ssh"
+  tags:
+    - ssh
+    - service
+
+- name: validate ssh config
+  command: sshd -t
+  changed_when: false
+  listen: "validate ssh config"
+  tags:
+    - ssh
+    - validation
+
+- name: restart ssh with validation
+  block:
+    - name: Validate SSH configuration before restart
+      command: sshd -t
+      changed_when: false
+    
+    - name: Restart SSH service
+      service:
+        name: "{{ ssh_service_name }}"
+        state: restarted
+  listen: "restart ssh with validation"
+  tags:
+    - ssh
+    - service
+    - validation

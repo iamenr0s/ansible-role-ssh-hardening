@@ -1,0 +1,143 @@
+---
+# SSH Hardening Role - Main Tasks
+# This role implements security best practices for SSH daemon configuration
+
+- name: Ensure SSH is installed
+  package:
+    name: "{{ ssh_package_name }}"
+    state: present
+  tags:
+    - ssh
+    - packages
+
+- name: Backup original SSH configuration
+  copy:
+    src: "{{ ssh_config_file }}"
+    dest: "{{ ssh_config_file }}.backup.{{ ansible_date_time.epoch }}"
+    remote_src: yes
+    backup: yes
+  tags:
+    - ssh
+    - backup
+
+- name: Generate SSH host keys if they don't exist
+  command: ssh-keygen -A
+  args:
+    creates: /etc/ssh/ssh_host_rsa_key
+  notify: restart ssh
+  tags:
+    - ssh
+    - keys
+
+- name: Set proper permissions on SSH host keys
+  file:
+    path: "{{ item }}"
+    owner: root
+    group: root
+    mode: '0600'
+  with_items:
+    - /etc/ssh/ssh_host_rsa_key
+    - /etc/ssh/ssh_host_ecdsa_key
+    - /etc/ssh/ssh_host_ed25519_key
+  ignore_errors: yes
+  tags:
+    - ssh
+    - permissions
+
+- name: Set proper permissions on SSH public keys
+  file:
+    path: "{{ item }}"
+    owner: root
+    group: root
+    mode: '0644'
+  with_items:
+    - /etc/ssh/ssh_host_rsa_key.pub
+    - /etc/ssh/ssh_host_ecdsa_key.pub
+    - /etc/ssh/ssh_host_ed25519_key.pub
+  ignore_errors: yes
+  tags:
+    - ssh
+    - permissions
+
+- name: Deploy hardened SSH configuration
+  template:
+    src: sshd_config.j2
+    dest: "{{ ssh_config_file }}"
+    owner: root
+    group: root
+    mode: '0644'
+    backup: yes
+    validate: sshd -t -f %s
+  notify: restart ssh
+  tags:
+    - ssh
+    - config
+
+- name: Create SSH banner file
+  template:
+    src: ssh_banner.j2
+    dest: "{{ ssh_banner_file }}"
+    owner: root
+    group: root
+    mode: '0644'
+  when: ssh_banner_enabled
+  notify: reload ssh
+  tags:
+    - ssh
+    - banner
+
+- name: Remove weak SSH host keys (DSA)
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - /etc/ssh/ssh_host_dsa_key
+    - /etc/ssh/ssh_host_dsa_key.pub
+  notify: restart ssh
+  tags:
+    - ssh
+    - security
+
+- name: Configure SSH client settings
+  template:
+    src: ssh_config.j2
+    dest: /etc/ssh/ssh_config
+    owner: root
+    group: root
+    mode: '0644'
+    backup: yes
+  when: configure_ssh_client
+  tags:
+    - ssh
+    - client
+
+- name: Ensure SSH service is enabled and started
+  service:
+    name: "{{ ssh_service_name }}"
+    state: started
+    enabled: yes
+  tags:
+    - ssh
+    - service
+
+- name: Validate SSH configuration
+  command: sshd -t
+  changed_when: false
+  tags:
+    - ssh
+    - validation
+
+- name: Display SSH hardening summary
+  debug:
+    msg: |
+      SSH Hardening Complete:
+      - Protocol version: {{ ssh_protocol }}
+      - Root login: {{ ssh_permit_root_login }}
+      - Password authentication: {{ ssh_password_authentication }}
+      - Public key authentication: {{ ssh_pubkey_authentication }}
+      - Port: {{ ssh_port }}
+      - Max auth tries: {{ ssh_max_auth_tries }}
+      - Login grace time: {{ ssh_login_grace_time }}
+  tags:
+    - ssh
+    - summary
