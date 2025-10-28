@@ -230,8 +230,4 @@ Contributions are welcome! Please:
 
 ## Changelog
 
-### Version 1.0.0
-- Initial release
-- Comprehensive SSH hardening implementation
-- Support for major Linux distributions
-- Security compliance features
+See `CHANGELOG.md` for version history and release notes.
