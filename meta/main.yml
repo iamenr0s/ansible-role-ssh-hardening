@@ -6,52 +6,27 @@ galaxy_info:
   description: "A comprehensive Ansible role for hardening SSH daemon configuration with security best practices"
   license: MIT
   min_ansible_version: "2.9"
-  
-  # Supported platforms
   platforms:
-    - name: Ubuntu
+    - name: "Debian"
       versions:
-        - bionic
-        - focal
-        - jammy
-    - name: Debian
+        - "bullseye"
+        - "bookworm"
+    - name: "EL"
       versions:
-        - buster
-        - bullseye
-        - bookworm
-    - name: CentOS
+        - "8"
+        - "9"
+    - name: "Fedora"
       versions:
-        - 7
-        - 8
-    - name: RedHat
+        - "38"
+        - "39"
+    - name: "Rocky"
       versions:
-        - 7
-        - 8
-        - 9
-    - name: Rocky
+        - "8.0"
+        - "9.0"
+    - name: "Ubuntu"
       versions:
-        - 8
-        - 9
-    - name: AlmaLinux
-      versions:
-        - 8
-        - 9
-    - name: Fedora
-      versions:
-        - 35
-        - 36
-        - 37
-        - 38
-    - name: Amazon
-      versions:
-        - 2
-        - 2023
-    - name: SLES
-      versions:
-        - 12
-        - 15
-
-  # Galaxy tags
+        - "focal"
+        - "jammy"
   galaxy_tags:
     - security
     - ssh
@@ -64,10 +39,7 @@ galaxy_info:
     - cis
     - nist
 
-# Role dependencies (none required)
 dependencies: []
-
-# Collections required
 collections:
   - ansible.posix
   - community.general

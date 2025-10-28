@@ -2,44 +2,44 @@
 # SSH Hardening Role - Handlers
 # These handlers manage SSH service state changes
 
-- name: restart ssh
-  service:
-    name: "{{ ssh_service_name }}"
-    state: restarted
+- name: Restart ssh
   listen: "restart ssh"
   tags:
     - ssh
     - service
-
-- name: reload ssh
-  service:
+  ansible.builtin.service:
     name: "{{ ssh_service_name }}"
-    state: reloaded
+    state: restarted
+
+- name: Reload ssh
   listen: "reload ssh"
   tags:
     - ssh
     - service
+  ansible.builtin.service:
+    name: "{{ ssh_service_name }}"
+    state: reloaded
 
-- name: validate ssh config
-  command: sshd -t
-  changed_when: false
+- name: Validate ssh config
   listen: "validate ssh config"
   tags:
     - ssh
     - validation
+  ansible.builtin.command: sshd -t
+  changed_when: false
 
-- name: restart ssh with validation
-  block:
-    - name: Validate SSH configuration before restart
-      command: sshd -t
-      changed_when: false
-    
-    - name: Restart SSH service
-      service:
-        name: "{{ ssh_service_name }}"
-        state: restarted
+- name: Restart ssh with validation
   listen: "restart ssh with validation"
   tags:
     - ssh
     - service
     - validation
+  block:
+    - name: Validate SSH configuration before restart
+      ansible.builtin.command: sshd -t
+      changed_when: false
+
+    - name: Restart SSH service
+      ansible.builtin.service:
+        name: "{{ ssh_service_name }}"
+        state: restarted
