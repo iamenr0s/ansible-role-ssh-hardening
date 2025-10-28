@@ -28,18 +28,20 @@
   ansible.builtin.command: sshd -t
   changed_when: false
 
-- name: Restart ssh with validation
+- name: Validate SSH configuration before restart
+  listen: "restart ssh with validation"
+  tags:
+    - ssh
+    - validation
+  ansible.builtin.command: sshd -t
+  changed_when: false
+
+- name: Restart ssh (validated)
   listen: "restart ssh with validation"
   tags:
     - ssh
     - service
     - validation
-  block:
-    - name: Validate SSH configuration before restart
-      ansible.builtin.command: sshd -t
-      changed_when: false
-
-    - name: Restart SSH service
-      ansible.builtin.service:
-        name: "{{ ssh_service_name }}"
-        state: restarted
+  ansible.builtin.service:
+    name: "{{ ssh_service_name }}"
+    state: restarted
