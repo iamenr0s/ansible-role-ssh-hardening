@@ -1,10 +1,71 @@
 ---
-# Purpose: assert that the instance really ended up in the expected state.
-# Molecule calls this playbook with `molecule verify`.
+
 - name: Verify
-  hosts: instance
-  gather_facts: false # Quicker, if you do not need facts
+  hosts: all
+  gather_facts: true
+  become: false
+
+  vars_files:
+    - ../../defaults/main.yml
+
   tasks:
-    - name: Assert something
+    - name: Verify | Read the deployed sshd_config
+      ansible.builtin.slurp:
+        src: "{{ ssh_config_file }}"
+      register: __verify_sshd_config
+
+    - name: Verify | Assert hardened sshd_config directives are present
+      vars:
+        __sshd_config: "{{ __verify_sshd_config.content | b64decode }}"
       ansible.builtin.assert:
-        that: true
+        that:
+          - "'Port ' ~ ssh_port in __sshd_config"
+          - "'PermitRootLogin ' ~ ssh_permit_root_login in __sshd_config"
+          - "'PasswordAuthentication ' ~ ssh_password_authentication in __sshd_config"
+          - "'PubkeyAuthentication ' ~ ssh_pubkey_authentication in __sshd_config"
+          - "'MaxAuthTries ' ~ ssh_max_auth_tries in __sshd_config"
+        fail_msg: Rendered sshd_config is missing one or more expected hardening directives
+
+    - name: Verify | Assert DSA host keys were removed
+      ansible.builtin.stat:
+        path: "{{ item }}"
+      loop:
+        - /etc/ssh/ssh_host_dsa_key
+        - /etc/ssh/ssh_host_dsa_key.pub
+      register: __verify_dsa_keys
+      failed_when: __verify_dsa_keys.stat.exists
+
+    - name: Verify | Gather service facts
+      ansible.builtin.service_facts:
+
+    - name: Verify | Assert the SSH service is running
+      vars:
+        __service_unit: "{{ ssh_service_name }}.service"
+      ansible.builtin.assert:
+        that:
+          - __service_unit in ansible_facts.services
+          - ansible_facts.services[__service_unit].state == 'running'
+        fail_msg: "{{ __service_unit }} is not running"
+
+    - name: Verify | Assert SSH banner file exists when enabled
+      when: ssh_banner_enabled
+      ansible.builtin.stat:
+        path: "{{ ssh_banner_file }}"
+      register: __verify_banner
+      failed_when: not __verify_banner.stat.exists
+
+    - name: Verify | Read the deployed client ssh_config
+      when: configure_ssh_client
+      ansible.builtin.slurp:
+        src: /etc/ssh/ssh_config
+      register: __verify_ssh_client_config
+
+    - name: Verify | Assert client ssh_config directives are present
+      when: configure_ssh_client
+      vars:
+        __client_config: "{{ __verify_ssh_client_config.content | b64decode }}"
+      ansible.builtin.assert:
+        that:
+          - "'PasswordAuthentication' in __client_config"
+          - "'HashKnownHosts' in __client_config"
+        fail_msg: Rendered client ssh_config is missing expected directives

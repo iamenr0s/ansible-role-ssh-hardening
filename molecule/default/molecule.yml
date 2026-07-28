@@ -1,58 +1,23 @@
 ---
-# Dependency management (download roles/collections)
+
+role_name_check: 1
 dependency:
   name: galaxy
   options:
-    ignore-certs: false
-    ignore-errors: false
-    role-file: requirements.yml
-    requirements-file: requirements.yml
-
-
-ansible:
-  cfg:
-    defaults:
-      host_key_checking: false
-      verbosity: 1
-    ssh_connection:
-      pipelining: true
-  env:
-    ANSIBLE_FORCE_COLOR: "1"
-    ANSIBLE_LOAD_CALLBACK_PLUGINS: "1"
-
-  executor:
-    backend: ansible-playbook
-    args:
-      ansible_playbook:
-        - --diff
-        - --force-handlers
-        - --inventory=/path/to/inventory.yml
-      ansible_navigator:
-        - --mode stdout
-        - --pull-policy missing
-        - --execution-environment-image ghcr.io/ansible/community-ansible-dev-tools:latest
-
+    ignore-errors: true
+driver:
+  name: podman
+platforms:
+  - name: instance
+    image: "iamenr0s/docker-${MOLECULE_DISTRO:-almalinux9}-ansible:latest"
+    command: ${MOLECULE_DOCKER_COMMAND:-""}
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+    privileged: true
+    pre_build_image: true
+    extra_opts:
+      - "--cgroupns=host"
+provisioner:
+  name: ansible
   playbooks:
-    create: create.yml
-    converge: converge.yml
-    destroy: destroy.yml
-    cleanup: cleanup.yml
-    prepare: prepare.yml
-    side_effect: side_effect.yml
-    verify: verify.yml
-
-scenario:
-  name: default
-  test_sequence:
-    - dependency
-    - cleanup
-    - destroy
-    - syntax
-    - create
-    - prepare
-    - converge
-    - idempotence
-    - side_effect
-    - verify
-    - cleanup
-    - destroy
+    converge: ${MOLECULE_PLAYBOOK:-converge.yml}
