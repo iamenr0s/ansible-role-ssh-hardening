@@ -68,6 +68,17 @@
     - ssh
     - permissions
 
+- name: Ensure SSH privilege separation directory exists
+  ansible.builtin.file:
+    path: /run/sshd
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  tags:
+    - ssh
+    - config
+
 - name: Deploy hardened SSH configuration
   ansible.builtin.template:
     src: sshd_config.j2

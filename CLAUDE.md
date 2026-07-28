@@ -52,13 +52,14 @@ This is an Ansible role (`iamenr0s.ansible_role_ssh_hardening`) that hardens the
 1. Install `ssh_package_name`.
 2. Generate SSH host keys if missing (`ssh-keygen -A`), notifying `restart ssh`.
 3. Fix ownership/permissions on host key and public key files.
-4. Render the hardened `sshd_config` from `templates/sshd_config.j2`, validated with `sshd -t -f %s` via the template task's `validate` option before it's ever written live, with `backup: yes` so the pre-existing config is preserved (only when it actually changes — this is what keeps the role idempotent); notifies `restart ssh`.
-5. Deploy the pre-login banner (`templates/ssh_banner.j2`) when `ssh_banner_enabled`; notifies `reload ssh`.
-6. Remove weak DSA host keys; notifies `restart ssh`.
-7. Render the client config (`templates/ssh_config.j2`) to `/etc/ssh/ssh_config` when `configure_ssh_client` (also `backup: yes`).
-8. Ensure the SSH service is started and enabled.
-9. Validate the live config with `sshd -t`.
-10. Print a summary of the applied hardening settings.
+4. Ensure `/run/sshd` exists — on Debian/Ubuntu this directory is tmpfs-backed and normally created by the service's first start; since `sshd -t` (used below and by the `validate ssh config`/`Validate SSH configuration` steps) refuses to run without it, the role creates it explicitly rather than relying on ordering.
+5. Render the hardened `sshd_config` from `templates/sshd_config.j2`, validated with `sshd -t -f %s` via the template task's `validate` option before it's ever written live, with `backup: yes` so the pre-existing config is preserved (only when it actually changes — this is what keeps the role idempotent); notifies `restart ssh`.
+6. Deploy the pre-login banner (`templates/ssh_banner.j2`) when `ssh_banner_enabled`; notifies `reload ssh`.
+7. Remove weak DSA host keys; notifies `restart ssh`.
+8. Render the client config (`templates/ssh_config.j2`) to `/etc/ssh/ssh_config` when `configure_ssh_client` (also `backup: yes`).
+9. Ensure the SSH service is started and enabled.
+10. Validate the live config with `sshd -t`.
+11. Print a summary of the applied hardening settings.
 
 Note: there is deliberately no separate up-front "backup original config" task — an earlier version had one that copied to a filename containing `ansible_date_time.epoch`, which made it non-idempotent (a new file every run, unconditionally "changed"). The `backup: yes` on the template tasks above covers the same need and only fires on a real change.
 
