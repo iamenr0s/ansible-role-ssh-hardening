@@ -257,11 +257,6 @@ Notes
 - Changing `ssh_port`, `ssh_permit_root_login`, or `ssh_password_authentication` can lock you out if your current session relies on the old settings — ensure console/out-of-band access before applying disruptive changes to a reachable host.
 - DSA host keys are removed unconditionally as part of hardening; if a client only supports DSA it will no longer be able to connect.
 
-Contributing & Security
------------------------
-- Contributions are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md).
-- Report vulnerabilities privately per [SECURITY.md](SECURITY.md); do not open public issues for them.
-
 CI & Release (maintainers)
 ---------------------------
 A single workflow (`.github/workflows/molecule.yml`) runs lint and the full Molecule distro matrix on pushes to `main`, PRs, and `v*` tags. On `v*` tags, a `release` job publishes to Ansible Galaxy after all tests pass.
@@ -280,15 +275,23 @@ gh secret set SECURITY_ALERT_WEBHOOK --env galaxy --repo iamenr0s/ansible-role-s
 
 To release: tag a commit `vX.Y.Z` and push the tag — CI gates the Galaxy publish.
 
-License
--------
-MIT
+## Contributing
 
-Author Information
--------------------
+Contributions are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md) for the
+local pipeline commands and pull request checklist. This project follows the
+[Contributor Covenant Code of Conduct](CODE_OF_CONDUCT.md).
+
+## Security
+
+See [SECURITY.md](SECURITY.md) — GitHub private vulnerability reporting, no
+public issues for security bugs.
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
+
+## Author Information
+
 Author: iamenr0s
-Galaxy: `iamenr0s.ansible_role_ssh_hardening`
 
-Changelog
----------
-See [CHANGELOG.md](CHANGELOG.md) for version history and release notes.
+Galaxy: `iamenr0s.ansible_role_ssh_hardening`
