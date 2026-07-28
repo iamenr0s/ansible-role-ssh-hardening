@@ -5,16 +5,15 @@
 # Basic SSH Hardening
 - name: Basic SSH Hardening
   hosts: basic_servers
-  become: yes
+  become: true
   roles:
-    - role: ansible-role-ssh-hardening
+    - role: iamenr0s.ansible_role_ssh_hardening
       tags: ['ssh', 'security']
 
----
 # Advanced SSH Hardening with Custom Configuration
 - name: Advanced SSH Hardening
   hosts: production_servers
-  become: yes
+  become: true
   vars:
     # Custom port for security through obscurity
     ssh_port: 2222
@@ -60,14 +59,13 @@
           X11Forwarding: "yes"
   
   roles:
-    - role: ansible-role-ssh-hardening
+    - role: iamenr0s.ansible_role_ssh_hardening
       tags: ['ssh', 'security', 'production']
 
----
 # High Security Environment
 - name: High Security SSH Configuration
   hosts: secure_servers
-  become: yes
+  become: true
   vars:
     # Network configuration
     ssh_port: 2222
@@ -115,14 +113,13 @@
       - diffie-hellman-group16-sha512
   
   roles:
-    - role: ansible-role-ssh-hardening
+    - role: iamenr0s.ansible_role_ssh_hardening
       tags: ['ssh', 'security', 'high-security']
 
----
 # Development Environment (Less Restrictive)
 - name: Development SSH Configuration
   hosts: dev_servers
-  become: yes
+  become: true
   vars:
     # Standard port for development
     ssh_port: 22
@@ -154,14 +151,13 @@
       - testers
   
   roles:
-    - role: ansible-role-ssh-hardening
+    - role: iamenr0s.ansible_role_ssh_hardening
       tags: ['ssh', 'security', 'development']
 
----
 # Compliance-Focused Configuration (CIS/NIST)
 - name: Compliance SSH Hardening
   hosts: compliance_servers
-  become: yes
+  become: true
   vars:
     # CIS Benchmark compliance settings
     ssh_protocol: 2
@@ -207,5 +203,5 @@
       ================================================================================
   
   roles:
-    - role: ansible-role-ssh-hardening
+    - role: iamenr0s.ansible_role_ssh_hardening
       tags: ['ssh', 'security', 'compliance', 'cis', 'nist']

@@ -1,0 +1,401 @@
+---
+
+argument_specs:
+  main:
+    short_description: >-
+      Hardens the SSH daemon (and optionally the SSH client) configuration
+      on Debian/Ubuntu and RHEL-family hosts with security best practices.
+    options:
+      ssh_package_name:
+        description: Name of the SSH server package to install.
+        type: str
+        default: "{{ 'openssh-server' if ansible_facts['os_family'] == 'Debian' else 'openssh' }}"
+      ssh_service_name:
+        description: Name of the SSH service to manage.
+        type: str
+        default: "{{ 'ssh' if ansible_facts['os_family'] == 'Debian' else 'sshd' }}"
+      ssh_config_file:
+        description: Path to the sshd configuration file to render.
+        type: str
+        default: /etc/ssh/sshd_config
+      ssh_port:
+        description: Port sshd listens on.
+        type: int
+        default: 22
+      ssh_listen_addresses:
+        description: Addresses sshd listens on. Empty means all interfaces.
+        type: list
+        elements: str
+        default: []
+      ssh_address_family:
+        description: Address family sshd uses (any, inet, inet6).
+        type: str
+        default: any
+      ssh_protocol:
+        description: SSH protocol version.
+        type: int
+        default: 2
+      ssh_host_key_types:
+        description: Host key algorithms sshd generates and uses.
+        type: list
+        elements: str
+        default:
+          - rsa
+          - ecdsa
+          - ed25519
+      ssh_kex_algorithms:
+        description: Allowed key exchange algorithms.
+        type: list
+        elements: str
+        default:
+          - curve25519-sha256@libssh.org
+          - diffie-hellman-group16-sha512
+          - diffie-hellman-group18-sha512
+          - diffie-hellman-group14-sha256
+      ssh_ciphers:
+        description: Allowed ciphers.
+        type: list
+        elements: str
+        default:
+          - chacha20-poly1305@openssh.com
+          - aes256-gcm@openssh.com
+          - aes128-gcm@openssh.com
+          - aes256-ctr
+          - aes192-ctr
+          - aes128-ctr
+      ssh_macs:
+        description: Allowed MAC algorithms.
+        type: list
+        elements: str
+        default:
+          - hmac-sha2-256-etm@openssh.com
+          - hmac-sha2-512-etm@openssh.com
+          - hmac-sha2-256
+          - hmac-sha2-512
+      ssh_login_grace_time:
+        description: Seconds allowed to complete authentication.
+        type: int
+        default: 30
+      ssh_permit_root_login:
+        description: Whether/how root may log in via SSH.
+        type: str
+        default: "no"
+      ssh_strict_modes:
+        description: Whether sshd checks file modes/ownership before accepting login.
+        type: str
+        default: "yes"
+      ssh_max_auth_tries:
+        description: Maximum authentication attempts per connection.
+        type: int
+        default: 3
+      ssh_max_sessions:
+        description: Maximum open shell/login sessions per network connection.
+        type: int
+        default: 2
+      ssh_max_startups:
+        description: Limits on concurrent unauthenticated connections (start:rate:full).
+        type: str
+        default: "10:30:60"
+      ssh_pubkey_authentication:
+        description: Whether public key authentication is allowed.
+        type: str
+        default: "yes"
+      ssh_authorized_keys_file:
+        description: Path(s), relative to the user's home, to authorized_keys files.
+        type: str
+        default: .ssh/authorized_keys
+      ssh_password_authentication:
+        description: Whether password authentication is allowed.
+        type: str
+        default: "no"
+      ssh_permit_empty_passwords:
+        description: Whether empty passwords are permitted when password auth is enabled.
+        type: str
+        default: "no"
+      ssh_challenge_response_auth:
+        description: Whether keyboard-interactive/challenge-response authentication is allowed.
+        type: str
+        default: "no"
+      ssh_kerberos_authentication:
+        description: Whether Kerberos authentication is allowed.
+        type: str
+        default: "no"
+      ssh_kerberos_or_local_passwd:
+        description: Whether failed Kerberos auth falls back to local password auth.
+        type: str
+        default: "no"
+      ssh_kerberos_ticket_cleanup:
+        description: Whether the user's Kerberos ticket cache is destroyed on logout.
+        type: str
+        default: "yes"
+      ssh_gssapi_authentication:
+        description: Whether GSSAPI authentication is allowed.
+        type: str
+        default: "no"
+      ssh_gssapi_cleanup_credentials:
+        description: Whether GSSAPI credentials are destroyed on logout.
+        type: str
+        default: "yes"
+      ssh_allow_users:
+        description: Usernames allowed to log in (empty means no restriction).
+        type: list
+        elements: str
+        default: []
+      ssh_deny_users:
+        description: Usernames denied login.
+        type: list
+        elements: str
+        default: []
+      ssh_allow_groups:
+        description: Groups allowed to log in (empty means no restriction).
+        type: list
+        elements: str
+        default: []
+      ssh_deny_groups:
+        description: Groups denied login.
+        type: list
+        elements: str
+        default: []
+      ssh_allow_agent_forwarding:
+        description: Whether ssh-agent forwarding is permitted.
+        type: str
+        default: "no"
+      ssh_allow_tcp_forwarding:
+        description: Whether TCP forwarding is permitted.
+        type: str
+        default: "no"
+      ssh_gateway_ports:
+        description: Whether remote hosts may connect to forwarded ports.
+        type: str
+        default: "no"
+      ssh_x11_forwarding:
+        description: Whether X11 forwarding is permitted.
+        type: str
+        default: "no"
+      ssh_x11_display_offset:
+        description: First display number available for sshd's X11 forwarding.
+        type: int
+        default: 10
+      ssh_x11_use_localhost:
+        description: Whether sshd binds X11 forwarding to the loopback address.
+        type: str
+        default: "yes"
+      ssh_permit_tty:
+        description: Whether pty allocation is permitted.
+        type: str
+        default: "yes"
+      ssh_permit_tunnel:
+        description: Whether tun device forwarding is permitted.
+        type: str
+        default: "no"
+      ssh_permit_user_environment:
+        description: Whether user environment files (~/.ssh/environment, environment=) are processed.
+        type: str
+        default: "no"
+      ssh_accept_env:
+        description: Environment variable patterns accepted from the client.
+        type: list
+        elements: str
+        default:
+          - LANG
+          - LC_*
+      ssh_compression:
+        description: Whether compression is enabled.
+        type: str
+        default: "no"
+      ssh_client_alive_interval:
+        description: Seconds between server-sent keepalive messages to idle clients.
+        type: int
+        default: 300
+      ssh_client_alive_count_max:
+        description: Unanswered keepalive messages allowed before disconnecting a client.
+        type: int
+        default: 2
+      ssh_syslog_facility:
+        description: Syslog facility sshd logs under.
+        type: str
+        default: AUTH
+      ssh_log_level:
+        description: sshd logging verbosity.
+        type: str
+        default: INFO
+      ssh_banner_enabled:
+        description: Whether a pre-login banner is deployed and configured.
+        type: bool
+        default: true
+      ssh_banner_file:
+        description: Path where the banner file is deployed.
+        type: str
+        default: /etc/ssh/banner
+      ssh_banner_content:
+        description: Contents of the pre-login banner file.
+        type: str
+        default: |
+          ***************************************************************************
+                                      AUTHORIZED ACCESS ONLY
+          ***************************************************************************
+
+          This system is for authorized users only. All activities on this system
+          are monitored and recorded. By accessing this system, you acknowledge that:
+
+          1. You are an authorized user
+          2. Your activities may be monitored and recorded
+          3. Unauthorized access is prohibited and may be subject to prosecution
+          4. You have no expectation of privacy on this system
+
+          If you are not an authorized user, disconnect immediately.
+
+          ***************************************************************************
+      ssh_subsystems:
+        description: SSH subsystems to configure (e.g. sftp).
+        type: list
+        elements: dict
+        default:
+          - name: sftp
+            command: /usr/lib/openssh/sftp-server
+      ssh_use_dns:
+        description: Whether sshd resolves the client's hostname for use in access control/logging.
+        type: str
+        default: "no"
+      ssh_permit_user_rc:
+        description: Whether ~/.ssh/rc is executed on login.
+        type: str
+        default: "no"
+      ssh_print_motd:
+        description: Whether sshd prints /etc/motd on login.
+        type: str
+        default: "no"
+      ssh_print_last_log:
+        description: Whether sshd prints the last login time on login.
+        type: str
+        default: "yes"
+      ssh_tcp_keep_alive:
+        description: Whether the server sends TCP keepalive messages.
+        type: str
+        default: "yes"
+      ssh_use_privilege_separation:
+        description: sshd privilege separation mode.
+        type: str
+        default: "yes"
+      ssh_authentication_methods:
+        description: Required authentication method combination(s).
+        type: list
+        elements: str
+        default:
+          - publickey
+      ssh_trusted_user_ca_keys:
+        description: Path to a file of CA public keys trusted to sign user certificates (empty disables).
+        type: str
+        default: ""
+      ssh_match_blocks:
+        description: >-
+          Conditional configuration blocks, each with a `condition` (the Match
+          criteria) and a `settings` dict of directive/value pairs.
+        type: list
+        elements: dict
+        default: []
+      configure_ssh_client:
+        description: Whether the system-wide SSH client configuration is managed.
+        type: bool
+        default: true
+      ssh_client_protocol:
+        description: SSH protocol version for the client.
+        type: int
+        default: 2
+      ssh_client_kex_algorithms:
+        description: Key exchange algorithms offered by the client. Defaults to ssh_kex_algorithms.
+        type: list
+        elements: str
+        default: "{{ ssh_kex_algorithms }}"
+      ssh_client_ciphers:
+        description: Ciphers offered by the client. Defaults to ssh_ciphers.
+        type: list
+        elements: str
+        default: "{{ ssh_ciphers }}"
+      ssh_client_macs:
+        description: MAC algorithms offered by the client. Defaults to ssh_macs.
+        type: list
+        elements: str
+        default: "{{ ssh_macs }}"
+      ssh_client_host_key_algorithms:
+        description: Host key algorithms accepted by the client.
+        type: list
+        elements: str
+        default:
+          - ssh-ed25519-cert-v01@openssh.com
+          - ssh-rsa-cert-v01@openssh.com
+          - ssh-ed25519
+          - ecdsa-sha2-nistp521
+          - ecdsa-sha2-nistp384
+          - ecdsa-sha2-nistp256
+          - rsa-sha2-512
+          - rsa-sha2-256
+      ssh_client_pubkey_accepted_key_types:
+        description: Public key types accepted by the client for authentication.
+        type: list
+        elements: str
+        default:
+          - ssh-ed25519-cert-v01@openssh.com
+          - ssh-rsa-cert-v01@openssh.com
+          - ssh-ed25519
+          - ecdsa-sha2-nistp521
+          - ecdsa-sha2-nistp384
+          - ecdsa-sha2-nistp256
+          - rsa-sha2-512
+          - rsa-sha2-256
+      ssh_client_password_authentication:
+        description: Whether the client falls back to password authentication.
+        type: str
+        default: "no"
+      ssh_client_challenge_response_auth:
+        description: Whether the client allows challenge-response authentication.
+        type: str
+        default: "no"
+      ssh_client_pubkey_authentication:
+        description: Whether the client uses public key authentication.
+        type: str
+        default: "yes"
+      ssh_client_strict_host_key_checking:
+        description: Client's host key verification policy (yes, no, ask).
+        type: str
+        default: ask
+      ssh_client_verify_host_key_dns:
+        description: Whether the client verifies host keys via DNS SSHFP records.
+        type: str
+        default: "yes"
+      ssh_client_forward_agent:
+        description: Whether the client forwards the local ssh-agent.
+        type: str
+        default: "no"
+      ssh_client_forward_x11:
+        description: Whether the client forwards X11.
+        type: str
+        default: "no"
+      ssh_client_forward_x11_trusted:
+        description: Whether client X11 forwarding is trusted.
+        type: str
+        default: "no"
+      ssh_client_server_alive_interval:
+        description: Seconds between client-sent keepalive messages to the server.
+        type: int
+        default: 300
+      ssh_client_server_alive_count_max:
+        description: Unanswered keepalive messages allowed before the client disconnects.
+        type: int
+        default: 2
+      ssh_client_tcp_keep_alive:
+        description: Whether the client sends TCP keepalive messages.
+        type: str
+        default: "yes"
+      ssh_client_compression:
+        description: Whether the client requests compression.
+        type: str
+        default: "no"
+      ssh_client_log_level:
+        description: Client logging verbosity.
+        type: str
+        default: INFO
+      ssh_client_hash_known_hosts:
+        description: Whether the client hashes entries added to known_hosts.
+        type: str
+        default: "yes"
