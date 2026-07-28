@@ -6,22 +6,10 @@
   ansible.builtin.package:
     name: "{{ ssh_package_name }}"
     state: present
+    update_cache: true
   tags:
     - ssh
     - packages
-
-- name: Backup original SSH configuration
-  ansible.builtin.copy:
-    src: "{{ ssh_config_file }}"
-    dest: "{{ ssh_config_file }}.backup.{{ ansible_date_time.epoch }}"
-    remote_src: yes
-    backup: yes
-    owner: root
-    group: root
-    mode: '0644'
-  tags:
-    - ssh
-    - backup
 
 - name: Generate SSH host keys if they don't exist
   ansible.builtin.command: ssh-keygen -A

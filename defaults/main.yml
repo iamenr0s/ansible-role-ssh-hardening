@@ -3,7 +3,7 @@
 # These variables can be overridden in host_vars, group_vars, or playbooks
 
 # Package and Service Configuration
-ssh_package_name: "{{ 'openssh-server' if ansible_facts['os_family'] == 'Debian' else 'openssh' }}"
+ssh_package_name: openssh-server
 ssh_service_name: "{{ 'ssh' if ansible_facts['os_family'] == 'Debian' else 'sshd' }}"
 ssh_config_file: /etc/ssh/sshd_config
 

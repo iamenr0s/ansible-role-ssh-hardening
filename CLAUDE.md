@@ -47,19 +47,20 @@ This is an Ansible role (`iamenr0s.ansible_role_ssh_hardening`) that hardens the
 
 ### Execution flow
 
-`tasks/main.yml` is a single, linear task file (no per-OS dispatch — `ssh_package_name`/`ssh_service_name` in `defaults/main.yml` already branch on `ansible_facts['os_family']`):
+`tasks/main.yml` is a single, linear task file (no per-OS dispatch — the only OS-family branch is `ssh_service_name` in `defaults/main.yml`, via `ansible_facts['os_family']`; the package name `openssh-server` is identical across Debian and RHEL family, so `ssh_package_name` is a plain constant, not templated):
 
 1. Install `ssh_package_name`.
-2. Back up the existing `sshd_config` (timestamped copy).
-3. Generate SSH host keys if missing (`ssh-keygen -A`), notifying `restart ssh`.
-4. Fix ownership/permissions on host key and public key files.
-5. Render the hardened `sshd_config` from `templates/sshd_config.j2`, validated with `sshd -t -f %s` via the template task's `validate` option before it's ever written live; notifies `restart ssh`.
-6. Deploy the pre-login banner (`templates/ssh_banner.j2`) when `ssh_banner_enabled`; notifies `reload ssh`.
-7. Remove weak DSA host keys; notifies `restart ssh`.
-8. Render the client config (`templates/ssh_config.j2`) to `/etc/ssh/ssh_config` when `configure_ssh_client`.
-9. Ensure the SSH service is started and enabled.
-10. Validate the live config with `sshd -t`.
-11. Print a summary of the applied hardening settings.
+2. Generate SSH host keys if missing (`ssh-keygen -A`), notifying `restart ssh`.
+3. Fix ownership/permissions on host key and public key files.
+4. Render the hardened `sshd_config` from `templates/sshd_config.j2`, validated with `sshd -t -f %s` via the template task's `validate` option before it's ever written live, with `backup: yes` so the pre-existing config is preserved (only when it actually changes — this is what keeps the role idempotent); notifies `restart ssh`.
+5. Deploy the pre-login banner (`templates/ssh_banner.j2`) when `ssh_banner_enabled`; notifies `reload ssh`.
+6. Remove weak DSA host keys; notifies `restart ssh`.
+7. Render the client config (`templates/ssh_config.j2`) to `/etc/ssh/ssh_config` when `configure_ssh_client` (also `backup: yes`).
+8. Ensure the SSH service is started and enabled.
+9. Validate the live config with `sshd -t`.
+10. Print a summary of the applied hardening settings.
+
+Note: there is deliberately no separate up-front "backup original config" task — an earlier version had one that copied to a filename containing `ansible_date_time.epoch`, which made it non-idempotent (a new file every run, unconditionally "changed"). The `backup: yes` on the template tasks above covers the same need and only fires on a real change.
 
 ### Handler wiring
 
@@ -67,7 +68,7 @@ This is an Ansible role (`iamenr0s.ansible_role_ssh_hardening`) that hardens the
 
 ### Testing
 
-Molecule uses Podman locally (`driver: podman`) but Docker in CI. The `MOLECULE_DISTRO` env var selects the container image from `iamenr0s/docker-<distro>-ansible:latest`. `converge.yml` bootstraps Python 3 via `raw` (some base images lack it), resets the connection, then runs an explicit `ansible.builtin.setup` — needed because this role's defaults (`ansible_facts['os_family']`) and tasks (`ansible_date_time.epoch`) both read facts, and the converge play itself runs with `gather_facts: false`. `verify.yml` asserts the rendered `sshd_config`/`ssh_config` contain the expected hardening directives, that DSA host keys are gone, that the SSH service is running, and that the banner file exists when enabled.
+Molecule uses Podman locally (`driver: podman`) but Docker in CI. The `MOLECULE_DISTRO` env var selects the container image from `iamenr0s/docker-<distro>-ansible:latest`. `converge.yml` bootstraps Python 3 via `raw` (some base images lack it), resets the connection, then runs an explicit `ansible.builtin.setup` — needed because this role's defaults (`ansible_facts['os_family']`) read facts, and the converge play itself runs with `gather_facts: false`. `verify.yml` asserts the rendered `sshd_config`/`ssh_config` contain the expected hardening directives, that DSA host keys are gone, that the SSH service is running, and that the banner file exists when enabled. The `idempotence` step in molecule's default test_sequence reruns converge and fails the build if any task reports `changed` the second time — this is what caught the old non-idempotent backup task.
 
 ### Lint rules
 

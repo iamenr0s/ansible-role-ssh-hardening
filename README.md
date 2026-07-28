@@ -39,7 +39,7 @@ All variables are defined in `defaults/main.yml`, grouped below in the same orde
 
 ### Package and service
 
-- `ssh_package_name` (str): SSH server package to install (default: `openssh-server` on Debian family, `openssh` elsewhere).
+- `ssh_package_name` (str): SSH server package to install (default: `openssh-server` — same package name across Debian and RHEL family).
 - `ssh_service_name` (str): SSH service to manage (default: `ssh` on Debian family, `sshd` elsewhere).
 - `ssh_config_file` (str): Path to the rendered sshd config (default: `/etc/ssh/sshd_config`).
 
