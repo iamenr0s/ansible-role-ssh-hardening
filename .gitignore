@@ -6,6 +6,7 @@ Desktop.ini
 # Editor/IDE
 .idea/
 .vscode/
+.trae
 
 # Temporary files
 *.swp
@@ -32,11 +33,13 @@ htmlcov/
 *.retry
 *.log
 
-# Exclude Ansible collections directory
-.ansible/collections/
+# Exclude Ansible directory
+.ansible/
 
-# Keep modules directory tracked (override above if needed)
-!.ansible/modules/
+# Claude Code
+.claude/
+.remember/
+CLAUDE.md
 
 # Build outputs (if any)
 dist/
