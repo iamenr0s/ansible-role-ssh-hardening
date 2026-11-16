@@ -1,4 +1,4 @@
-[![Molecule](https://github.com/iamenr0s/ansible-role-ssh-hardening/actions/workflows/molecule.yml/badge.svg)](https://github.com/iamenr0s/ansible-role-ssh-hardening/actions/workflows/molecule.yml) ![Ansible Role](https://img.shields.io/ansible/role/d/iamenr0s/ansible_role_ssh_hardening) [![CodeFactor](https://www.codefactor.io/repository/github/iamenr0s/ansible-role-ssh-hardening/badge)](https://www.codefactor.io/repository/github/iamenr0s/ansible-role-ssh-hardening)
+[![Molecule](https://github.com/iamenr0s/ansible-role-ssh-hardening/actions/workflows/molecule.yml/badge.svg)](https://github.com/iamenr0s/ansible-role-ssh-hardening/actions/workflows/molecule.yml) ![Ansible Role](https://img.shields.io/ansible/role/d/iamenr0s/ssh_hardening) [![CodeFactor](https://www.codefactor.io/repository/github/iamenr0s/ansible-role-ssh-hardening/badge)](https://www.codefactor.io/repository/github/iamenr0s/ansible-role-ssh-hardening)
 
 Ansible Role: SSH Hardening
 ============================
@@ -201,7 +201,7 @@ Basic hardening on default settings:
 - hosts: all
   become: true
   roles:
-    - role: iamenr0s.ansible_role_ssh_hardening
+    - role: iamenr0s.ssh_hardening
 ```
 
 Custom port and access control:
@@ -225,7 +225,7 @@ Custom port and access control:
       This is a production system. Unauthorized access is strictly prohibited.
       ================================================================================
   roles:
-    - role: iamenr0s.ansible_role_ssh_hardening
+    - role: iamenr0s.ssh_hardening
 ```
 
 High-security configuration with per-user `Match` overrides:
@@ -248,7 +248,7 @@ High-security configuration with per-user `Match` overrides:
           ForceCommand: "/usr/local/bin/backup-only.sh"
           AllowTcpForwarding: "no"
   roles:
-    - role: iamenr0s.ansible_role_ssh_hardening
+    - role: iamenr0s.ssh_hardening
 ```
 
 Notes
@@ -294,4 +294,4 @@ This project is licensed under the [MIT License](LICENSE).
 
 Author: iamenr0s
 
-Galaxy: `iamenr0s.ansible_role_ssh_hardening`
+Galaxy: `iamenr0s.ssh_hardening`
