@@ -1,7 +1,7 @@
 ---
 # SSH Hardening Role - Metadata
 galaxy_info:
-  role_name: ansible_role_ssh_hardening
+  role_name: ssh_hardening
   author: "iamenr0s"
   description: "A comprehensive Ansible role for hardening SSH daemon configuration with security best practices"
   license: MIT

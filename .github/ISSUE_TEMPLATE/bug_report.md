@@ -17,7 +17,7 @@ Playbook / role invocation and any non-default variables:
 ```yaml
 - hosts: all
   roles:
-    - role: iamenr0s.ansible_role_ssh_hardening
+    - role: iamenr0s.ssh_hardening
 ```
 
 ## Expected behavior

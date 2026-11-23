@@ -7,7 +7,7 @@
   hosts: basic_servers
   become: true
   roles:
-    - role: iamenr0s.ansible_role_ssh_hardening
+    - role: iamenr0s.ssh_hardening
       tags: ['ssh', 'security']
 
 # Advanced SSH Hardening with Custom Configuration
@@ -59,7 +59,7 @@
           X11Forwarding: "yes"
   
   roles:
-    - role: iamenr0s.ansible_role_ssh_hardening
+    - role: iamenr0s.ssh_hardening
       tags: ['ssh', 'security', 'production']
 
 # High Security Environment
@@ -113,7 +113,7 @@
       - diffie-hellman-group16-sha512
   
   roles:
-    - role: iamenr0s.ansible_role_ssh_hardening
+    - role: iamenr0s.ssh_hardening
       tags: ['ssh', 'security', 'high-security']
 
 # Development Environment (Less Restrictive)
@@ -151,7 +151,7 @@
       - testers
   
   roles:
-    - role: iamenr0s.ansible_role_ssh_hardening
+    - role: iamenr0s.ssh_hardening
       tags: ['ssh', 'security', 'development']
 
 # Compliance-Focused Configuration (CIS/NIST)
@@ -203,5 +203,5 @@
       ================================================================================
   
   roles:
-    - role: iamenr0s.ansible_role_ssh_hardening
+    - role: iamenr0s.ssh_hardening
       tags: ['ssh', 'security', 'compliance', 'cis', 'nist']
