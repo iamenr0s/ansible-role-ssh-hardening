@@ -8,7 +8,7 @@ Thanks for taking the time to contribute to `iamenr0s.ssh_hardening`!
 2. Install the development dependencies:
 
    ```bash
-   pip3 install "ansible<10" molecule molecule-plugins[docker] docker cryptography yamllint ansible-lint
+   pip3 install ansible molecule "molecule-plugins[podman]" yamllint ansible-lint
    ```
 
 ## Making changes
@@ -32,7 +32,7 @@ molecule test
 MOLECULE_DISTRO=ubuntu2404 molecule test
 ```
 
-Molecule uses Podman locally and Docker in CI. The CI matrix covers Debian, Ubuntu, AlmaLinux, Rocky Linux, and Fedora — changes must not break any supported distro (see `platforms` in `meta/main.yml`).
+Molecule uses Podman, locally and in CI. The CI matrix covers Debian, Ubuntu, AlmaLinux, Rocky Linux, and Fedora — changes must not break any supported distro (see `platforms` in `meta/main.yml`).
 
 ## Submitting a pull request
 
