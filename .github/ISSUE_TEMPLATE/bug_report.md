@@ -40,4 +40,4 @@ paste output here
 
 ## Additional context
 
-Anything else that might help (custom `ssh_*` variables, proxy, air-gapped mirror, etc.).
+Anything else that might help (custom `ssh_*` variables, etc.).
