@@ -1,1 +1,15 @@
+---
+# SSH Hardening Role - Handlers
+# These handlers manage SSH service state changes
 
+- name: Restart ssh
+  listen: "restart ssh"
+  ansible.builtin.service:
+    name: "{{ ssh_service_name }}"
+    state: restarted
+
+- name: Reload ssh
+  listen: "reload ssh"
+  ansible.builtin.service:
+    name: "{{ ssh_service_name }}"
+    state: reloaded
