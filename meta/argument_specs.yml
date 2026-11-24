@@ -11,9 +11,8 @@ argument_specs:
         type: str
         default: openssh-server
       ssh_service_name:
-        description: Name of the SSH service to manage.
+        description: Name of the SSH service to manage (default ssh on the Debian family, sshd on the RedHat family).
         type: str
-        default: "{{ 'ssh' if ansible_facts['os_family'] == 'Debian' else 'sshd' }}"
       ssh_config_file:
         description: Path to the sshd configuration file to render.
         type: str
@@ -31,10 +30,6 @@ argument_specs:
         description: Address family sshd uses (any, inet, inet6).
         type: str
         default: any
-      ssh_protocol:
-        description: SSH protocol version.
-        type: int
-        default: 2
       ssh_host_key_types:
         description: Host key algorithms sshd generates and uses.
         type: list
@@ -247,12 +242,11 @@ argument_specs:
 
           ***************************************************************************
       ssh_subsystems:
-        description: SSH subsystems to configure (e.g. sftp).
+        description: >-
+          SSH subsystems to configure. Default is sftp with the OS family's sftp-server
+          (/usr/lib/openssh/sftp-server on Debian, /usr/libexec/openssh/sftp-server on RedHat).
         type: list
         elements: dict
-        default:
-          - name: sftp
-            command: /usr/lib/openssh/sftp-server
       ssh_use_dns:
         description: Whether sshd resolves the client's hostname for use in access control/logging.
         type: str
@@ -271,10 +265,6 @@ argument_specs:
         default: "yes"
       ssh_tcp_keep_alive:
         description: Whether the server sends TCP keepalive messages.
-        type: str
-        default: "yes"
-      ssh_use_privilege_separation:
-        description: sshd privilege separation mode.
         type: str
         default: "yes"
       ssh_authentication_methods:
@@ -298,10 +288,6 @@ argument_specs:
         description: Whether the system-wide SSH client configuration is managed.
         type: bool
         default: true
-      ssh_client_protocol:
-        description: SSH protocol version for the client.
-        type: int
-        default: 2
       ssh_client_kex_algorithms:
         description: Key exchange algorithms offered by the client. Defaults to ssh_kex_algorithms.
         type: list

@@ -4,16 +4,14 @@
 
 # Package and Service Configuration
 ssh_package_name: openssh-server
-ssh_service_name: "{{ 'ssh' if ansible_facts['os_family'] == 'Debian' else 'sshd' }}"
+# The role loads vars/<os_family>.yml first; default() only covers argument validation, which runs before it.
+ssh_service_name: "{{ __ssh_hardening_service_name | default('sshd') }}"
 ssh_config_file: /etc/ssh/sshd_config
 
 # Network Configuration
 ssh_port: 22
 ssh_listen_addresses: []  # Empty list means listen on all interfaces
 ssh_address_family: any   # any, inet, inet6
-
-# Protocol and Security
-ssh_protocol: 2
 
 # Host Key Types (only secure algorithms)
 ssh_host_key_types:
@@ -124,7 +122,7 @@ ssh_banner_content: |
 # Subsystems
 ssh_subsystems:
   - name: sftp
-    command: /usr/lib/openssh/sftp-server
+    command: "{{ __ssh_hardening_sftp_server | default('/usr/libexec/openssh/sftp-server') }}"
 
 # Additional Security Settings
 ssh_use_dns: "no"
@@ -132,7 +130,6 @@ ssh_permit_user_rc: "no"
 ssh_print_motd: "no"
 ssh_print_last_log: "yes"
 ssh_tcp_keep_alive: "yes"
-ssh_use_privilege_separation: "yes"
 
 # Authentication Methods
 ssh_authentication_methods:
@@ -152,7 +149,6 @@ ssh_match_blocks: []
 
 # SSH Client Configuration
 configure_ssh_client: true
-ssh_client_protocol: 2
 ssh_client_kex_algorithms: "{{ ssh_kex_algorithms }}"
 ssh_client_ciphers: "{{ ssh_ciphers }}"
 ssh_client_macs: "{{ ssh_macs }}"

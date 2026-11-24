@@ -12,13 +12,13 @@ Features
 - Access control via `ssh_allow_users`/`ssh_deny_users`/`ssh_allow_groups`/`ssh_deny_groups` and `Match` blocks.
 - Removes weak DSA host keys and regenerates missing host keys (`ssh-keygen -A`).
 - Deploys a configurable pre-login banner.
-- Validates the rendered config with `sshd -t` before and after restart (`validate` on the template task, plus a `validate ssh config` handler).
+- Validates the rendered config with `sshd -t` before and after restart (`validate` on the template task, plus a final `sshd -t` check).
 - Backs up the original `sshd_config` before overwriting it.
 - Optionally hardens the system-wide SSH client (`/etc/ssh/ssh_config`).
 
 Requirements
 ------------
-- Ansible 2.9+.
+- Ansible (ansible-core) 2.16+.
 - Target systems with OpenSSH installed (or installable via the OS package manager — the role installs `ssh_package_name` if missing).
 - Run with privilege escalation on real hosts: `become: true` is recommended.
 - No non-`ansible.builtin` collections are required.
@@ -48,10 +48,6 @@ All variables are defined in `defaults/main.yml`, grouped below in the same orde
 - `ssh_port` (int): Port sshd listens on (default: `22`).
 - `ssh_listen_addresses` (list): Addresses sshd listens on; empty means all interfaces (default: `[]`).
 - `ssh_address_family` (str): `any`, `inet`, or `inet6` (default: `any`).
-
-### Protocol
-
-- `ssh_protocol` (int): SSH protocol version (default: `2`).
 
 ### Host key types
 
@@ -139,7 +135,7 @@ All variables are defined in `defaults/main.yml`, grouped below in the same orde
 
 ### Subsystems
 
-- `ssh_subsystems` (list of dicts): Subsystems to configure, each with `name` and `command` (default: `[{name: sftp, command: /usr/lib/openssh/sftp-server}]`).
+- `ssh_subsystems` (list of dicts): Subsystems to configure, each with `name` and `command` (default: `sftp` with `/usr/lib/openssh/sftp-server` on the Debian family, `/usr/libexec/openssh/sftp-server` on the RedHat family).
 
 ### Additional security settings
 
@@ -148,7 +144,6 @@ All variables are defined in `defaults/main.yml`, grouped below in the same orde
 - `ssh_print_motd` (str): Print `/etc/motd` on login (default: `"no"`).
 - `ssh_print_last_log` (str): Print last login time (default: `"yes"`).
 - `ssh_tcp_keep_alive` (str): Send TCP keepalives (default: `"yes"`).
-- `ssh_use_privilege_separation` (str): Privilege separation mode (default: `"yes"`).
 
 ### Authentication methods
 
@@ -172,7 +167,6 @@ All variables are defined in `defaults/main.yml`, grouped below in the same orde
 ### SSH client configuration
 
 - `configure_ssh_client` (bool): Manage the system-wide SSH client config (default: `true`).
-- `ssh_client_protocol` (int): Client SSH protocol version (default: `2`).
 - `ssh_client_kex_algorithms` (list): Client key exchange algorithms (default: `ssh_kex_algorithms`).
 - `ssh_client_ciphers` (list): Client ciphers (default: `ssh_ciphers`).
 - `ssh_client_macs` (list): Client MAC algorithms (default: `ssh_macs`).
@@ -256,6 +250,9 @@ Notes
 - The role backs up the existing `sshd_config` (with a timestamp suffix) before deploying the hardened one, and validates the new config with `sshd -t` via the template's `validate` option before it's ever written live.
 - Changing `ssh_port`, `ssh_permit_root_login`, or `ssh_password_authentication` can lock you out if your current session relies on the old settings — ensure console/out-of-band access before applying disruptive changes to a reachable host.
 - DSA host keys are removed unconditionally as part of hardening; if a client only supports DSA it will no longer be able to connect.
+- **Idempotent:** yes. A second run reports no changes, and the Molecule `idempotence` step checks this.
+- **Check mode:** `--check --diff` previews the rendered `sshd_config` and `ssh_config` on hosts where OpenSSH is already installed. On a host without it, the simulated install leaves no service to start, so check mode fails there.
+- **Rollback:** the previous `sshd_config` and `ssh_config` are kept as timestamped backups next to the file. Copy the backup back and restart the service (`ssh` on the Debian family, `sshd` on the RedHat family). Removed DSA host keys are not restored.
 
 CI & Release (maintainers)
 ---------------------------
