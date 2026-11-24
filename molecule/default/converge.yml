@@ -34,4 +34,4 @@
       ansible.builtin.setup:
 
   roles:
-    - role: "{{ playbook_dir }}/../.."
+    - role: "{{ playbook_dir }}/../.."  # noqa: role-name[path]

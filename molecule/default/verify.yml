@@ -9,6 +9,9 @@
     - ../../defaults/main.yml
 
   tasks:
+    - name: Verify | Load the OS family's SSH paths and unit names, as the role does
+      ansible.builtin.include_vars: "../../vars/{{ ansible_facts['os_family'] }}.yml"
+
     - name: Verify | Read the deployed sshd_config
       ansible.builtin.slurp:
         src: "{{ ssh_config_file }}"
@@ -19,12 +22,25 @@
         __sshd_config: "{{ __verify_sshd_config.content | b64decode }}"
       ansible.builtin.assert:
         that:
-          - "'Port ' ~ ssh_port in __sshd_config"
-          - "'PermitRootLogin ' ~ ssh_permit_root_login in __sshd_config"
-          - "'PasswordAuthentication ' ~ ssh_password_authentication in __sshd_config"
-          - "'PubkeyAuthentication ' ~ ssh_pubkey_authentication in __sshd_config"
-          - "'MaxAuthTries ' ~ ssh_max_auth_tries in __sshd_config"
+          - __sshd_config is search('(?m)^Port ' ~ ssh_port ~ '$')
+          - __sshd_config is search('(?m)^PermitRootLogin ' ~ ssh_permit_root_login ~ '$')
+          - __sshd_config is search('(?m)^PasswordAuthentication ' ~ ssh_password_authentication ~ '$')
+          - __sshd_config is search('(?m)^PubkeyAuthentication ' ~ ssh_pubkey_authentication ~ '$')
+          - __sshd_config is search('(?m)^MaxAuthTries ' ~ ssh_max_auth_tries ~ '$')
+          - __sshd_config is search('(?m)^Ciphers ' ~ (ssh_ciphers | join(',')) ~ '$')
+          - __sshd_config is search('(?m)^MACs ' ~ (ssh_macs | join(',')) ~ '$')
+          - __sshd_config is search('(?m)^KexAlgorithms ' ~ (ssh_kex_algorithms | join(',')) ~ '$')
         fail_msg: Rendered sshd_config is missing one or more expected hardening directives
+
+    - name: Verify | Find the sftp subsystem in sshd_config
+      ansible.builtin.set_fact:
+        __verify_sftp: '{{ (__verify_sshd_config.content | b64decode) | regex_search("(?m)^Subsystem\s+sftp\s+\S+") | split | last }}'
+
+    - name: Verify | Assert the sftp server binary exists
+      ansible.builtin.stat:
+        path: "{{ __verify_sftp }}"
+      register: __verify_sftp_stat
+      failed_when: not __verify_sftp_stat.stat.exists
 
     - name: Verify | Assert DSA host keys were removed
       ansible.builtin.stat:
@@ -48,20 +64,20 @@
         fail_msg: "{{ __service_unit }} is not running"
 
     - name: Verify | Assert SSH banner file exists when enabled
-      when: ssh_banner_enabled
+      when: ssh_banner_enabled | bool
       ansible.builtin.stat:
         path: "{{ ssh_banner_file }}"
       register: __verify_banner
       failed_when: not __verify_banner.stat.exists
 
     - name: Verify | Read the deployed client ssh_config
-      when: configure_ssh_client
+      when: configure_ssh_client | bool
       ansible.builtin.slurp:
         src: /etc/ssh/ssh_config
       register: __verify_ssh_client_config
 
     - name: Verify | Assert client ssh_config directives are present
-      when: configure_ssh_client
+      when: configure_ssh_client | bool
       vars:
         __client_config: "{{ __verify_ssh_client_config.content | b64decode }}"
       ansible.builtin.assert:

@@ -1,0 +1,4 @@
+---
+# RedHat family (RHEL, AlmaLinux, Rocky, Fedora): OpenSSH paths and unit names.
+__ssh_hardening_service_name: sshd
+__ssh_hardening_sftp_server: /usr/libexec/openssh/sftp-server
